@@ -14,7 +14,15 @@ public class Counter implements AutoCloseable {
     @Override
     public void close() throws Exception {
         if (count > 0) {
-            throw new Exception("Resource not closed properly");
+            System.out.println("Resource not closed properly");
         }
+
+        // Сбрасываем счетчик при закрытии, независимо от его состояния
+        reset();
+    }
+
+    // Метод для сброса счетчика
+    private void reset() {
+        count = 0;
     }
 }
