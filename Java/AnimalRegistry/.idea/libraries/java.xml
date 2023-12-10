@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="java">
+    <CLASSES />
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$USER_HOME$/Downloads/gson-gson-parent-2.10.1/gson-gson-parent-2.10.1/gson/src/main/java" />
+      <root url="file://$USER_HOME$/Downloads/gson-gson-parent-2.10.1/gson-gson-parent-2.10.1/gson/src/main/java-templates" />
+      <root url="file://$USER_HOME$/Downloads/gson-gson-parent-2.10.1/gson-gson-parent-2.10.1/gson/src/test/java" />
+    </SOURCES>
+  </library>
+</component>
