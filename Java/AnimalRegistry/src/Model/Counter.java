@@ -17,8 +17,8 @@ public class Counter implements AutoCloseable {
             System.out.println("Resource not closed properly");
         }
 
-        // Сбрасываем счетчик при закрытии, независимо от его состояния
-        reset();
+
+
     }
 
     // Метод для сброса счетчика

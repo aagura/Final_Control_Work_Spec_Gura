@@ -2,16 +2,14 @@ package Presenter;
 
 import Model.*;
 import View.AnimalRegistryView;
-import View.ConsoleAnimalRegistryView;
 
 import java.lang.reflect.Constructor;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 public class AnimalRegistryPresenter {
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
     private final AnimalRegistryView view;
     private final AnimalRegistryModel model;
 
@@ -26,7 +24,6 @@ public class AnimalRegistryPresenter {
             while (true) {
                 view.showMenu();
                 String choice = view.getInput();
-
                 switch (choice) {
                     case "1":
                         onNewAnimalButtonClicked();
@@ -48,19 +45,14 @@ public class AnimalRegistryPresenter {
                 }
             }
         } finally {
-            // Закройте Scanner после завершения программы
+
             view.closeScanner();
         }
     }
 
 
-    private void onTeachAnimalCategoriesButtonClicked() {
-        // Логика для обучения категориям животных
-    }
 
-    private void onDeleteAnimalButtonClicked() {
-        // Логика для удаления животных
-    }
+
 
     private void onNewAnimalButtonClicked() {
         try (Counter counter = new Counter()) {
@@ -79,9 +71,7 @@ public class AnimalRegistryPresenter {
 
     private void onShowAnimalCategoriesButtonClicked() {
         while (true) {
-            // Выводим меню категорий животных
             view.showAnimalCategoriesMenu();
-
             String categoryChoice = view.getInput();
 
             switch (categoryChoice) {
@@ -91,11 +81,9 @@ public class AnimalRegistryPresenter {
                 case "4":
                 case "5":
                 case "6":
-                    // Изменим вызов метода showAnimalList, чтобы он возвращал List<Map<String, Object>>
-                    showAnimalList(categoryChoice);
+                    showAnimalList(getCategoryByChoice(categoryChoice));
                     break;
                 case "7":
-                    // Изменим вызов метода showAnimalList, чтобы он возвращал List<Map<String, Object>>
                     showAnimalList("All");
                     break;
                 case "8":
@@ -108,33 +96,13 @@ public class AnimalRegistryPresenter {
 
     private void showAnimalList(String category) {
         List<Map<String, Object>> animalList = model.getAnimalsByCategoryList(category);
-
-        // Заголовки таблицы
-        String[] headers = {"ID", "Name", "Birth Date", "Category"};
+        String[] headers = {"ID", "Name", "Birth Date", "Category","Commands"};
 
         view.showAnimalList(animalList, headers);
 
-        while (true) {
-            view.showCommandsMenu();
-            String commandsChoice = view.getInput();
 
-            switch (commandsChoice) {
-                case "1":
-                    // Логика для отображения команд животных
-                    view.showAnimalCommands(model.getAnimalCommands());
-                    break;
-                case "2":
-                    return;
-                default:
-                    view.showErrorMessage("Invalid choice. Please try again.");
-            }
-        }
+
     }
-
-
-    // В классе AnimalRegistryPresenter
-
-
 
 
     private Class<? extends HumanFriends> getAnimalClass() {
@@ -162,32 +130,26 @@ public class AnimalRegistryPresenter {
     private HumanFriends addAnimal(Class<? extends HumanFriends> animalClass) {
         try  {
             int newId = model.findMaxId() + 1;
-            System.out.println(newId);
 
-            // Получаем конструктор без параметров
             Constructor<? extends HumanFriends> constructor = animalClass.getDeclaredConstructor();
 
-            // Используем конструктор без параметров
             HumanFriends newAnimal = constructor.newInstance();
 
-            // Вводим данные для нового животного
             String name = view.getUserInputAnimalName(animalClass);
             Date birthDate = view.getUserInputAnimalBirthDate(animalClass);
             List<String> commands = view.getUserInputAnimalCommands(animalClass);
 
-            // Заполняем данные для нового животного
             newAnimal.setId(newId);
             newAnimal.setName(name);
             newAnimal.setBirthDate(birthDate);
             newAnimal.setCommands(commands);
 
-            // Добавляем новое животное в список
+
             AnimalRegistryModel.addNewAnimal(newAnimal);
 
-            // Помечаем, что ресурс был закрыт успешно
             return newAnimal;
         } catch (Exception e) {
-            // Перехватываем исключение Resource not closed properly и не выводим сообщение
+
             if (!"Resource not closed properly".equals(e.getMessage())) {
                 view.showErrorMessage("Error creating animal: " + e.getMessage());
             }
@@ -196,13 +158,60 @@ public class AnimalRegistryPresenter {
     }
 
     private boolean areAllFieldsFilled(HumanFriends animal) {
-        System.out.println(animal.getId() );
-        System.out.println(animal.getName());
-        System.out.println(animal.getBirthDate());
-        System.out.println(animal.getCommands());
-        // Здесь проверьте, что все необходимые поля объекта animal заполнены
-        // Например, вам нужно проверить, что id, имя, дата рождения и команды не пусты
         return animal.getId() != 0 && !animal.getName().isEmpty() && animal.getBirthDate() != null && !animal.getCommands().isEmpty();
     }
+    private String getCategoryByChoice(String choice) {
+        switch (choice) {
+            case "1":
+                return "Cat";
+            case "2":
+                return "Dog";
+            case "3":
+                return "Hamster";
+            case "4":
+                return "Horse";
+            case "5":
+                return "Donkey";
+            case "6":
+                return "Camel";
+            case "7":
+                return "All";
+            case "8":
+                return "Exit;";
+            default:
+                return null;
+        }
+    }
+
+    private void onDeleteAnimalButtonClicked() {
+
+        showAnimalList("All");
+        int animalIdToDelete = view.getUserInputAnimalIdToDelete();
+
+
+        if (model.animalExists(animalIdToDelete)) {
+            model.removeAnimalById(animalIdToDelete);
+            view.showSuccessMessage("Animal with ID " + animalIdToDelete + " has been removed.");
+        } else {
+            view.showErrorMessage("Animal with ID " + animalIdToDelete + " not found.");
+        }
+    }
+    private void onTeachAnimalCategoriesButtonClicked() {
+        while (true) {
+            showAnimalList("All");
+
+            int animalIdToTeach = view.getAnimalIdToTeach();
+            if (!model.animalExists(animalIdToTeach)) {
+                view.showErrorMessage("Животное с ID " + animalIdToTeach + " не найдено. Повторите ввод.");
+                break;
+            }
+
+            String newCommand = view.getUserInputNewCommand();
+            model.teachAnimal(animalIdToTeach, newCommand);
+            view.showSuccessMessage("Животное обучено новой команде. Новая команда: " + newCommand);
+            break;
+        }
+    }
+
 
 }

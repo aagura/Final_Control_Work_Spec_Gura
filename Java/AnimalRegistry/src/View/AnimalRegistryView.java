@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 public interface AnimalRegistryView {
+
+
     void showAnimalCommands(List<String> commands);
 
     void showMenu();
@@ -17,9 +19,11 @@ public interface AnimalRegistryView {
 
     String getInput();
 
+
     void showAnimalList(List<Map<String, Object>> animalList);
 
     void showAnimalList(List<Map<String, Object>> animalList, String[] headers);
+
 
     void showCommandsMenu();
 
@@ -34,4 +38,10 @@ public interface AnimalRegistryView {
     void closeScanner();
 
     void showAnimalCategoriesMenu();
+
+    int getUserInputAnimalIdToDelete();
+
+    int getAnimalIdToTeach();
+
+    String getUserInputNewCommand();
 }

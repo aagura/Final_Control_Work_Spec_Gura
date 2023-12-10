@@ -5,6 +5,7 @@ import Service.DBHandler;
 import java.util.*;
 
 public class AnimalRegistryModel {
+
     private static List<HumanFriends> animals;
 
     public AnimalRegistryModel() {
@@ -12,12 +13,12 @@ public class AnimalRegistryModel {
     }
 
     public static void addNewAnimal(HumanFriends newAnimal) {
+
         animals.add(newAnimal);
     }
 
     public static int findMaxId() {
         if (animals.isEmpty()) {
-            System.out.println(0);
             return 0;
         }
 
@@ -25,7 +26,7 @@ public class AnimalRegistryModel {
         for (HumanFriends animal : animals) {
             if (animal.getId() > maxId) {
                 maxId = animal.getId();
-                System.out.println(maxId);
+
             }
         }
 
@@ -34,7 +35,7 @@ public class AnimalRegistryModel {
 
 
 
-    // В классе AnimalRegistryModel
+
     public List<Map<String, Object>> getAnimalsByCategoryList(String category) {
         List<Map<String, Object>> animalList = new ArrayList<>();
         for (HumanFriends animal : animals) {
@@ -44,6 +45,10 @@ public class AnimalRegistryModel {
                 animalInfo.put("name", animal.getName());
                 animalInfo.put("birthDate", animal.getBirthDate());
                 animalInfo.put("category", animal.getClass().getSimpleName());
+
+                animalInfo.put("commands", ((HumanFriends) animal).getCommands());
+
+
                 animalList.add(animalInfo);
             }
         }
@@ -51,42 +56,46 @@ public class AnimalRegistryModel {
     }
 
 
-
-
-    public List<String> getAnimalCommands() {
-        // Логика получения списка команд для выбранного животного
-        // ...
-        return new ArrayList<>();
-    }
     public void loadFromDatabase() {
         try {
-            DBHandler.loadFromDatabase(animals); // Загрузим данные из базы данных
+            DBHandler.loadFromDatabase(animals);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // Метод для сохранения данных в файл
     public void saveToFile() {
         try {
-            DBHandler.saveToDatabase(animals); // Сохраним данные в базу данных
+            DBHandler.saveToDatabase(animals);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    public List<HumanFriends> getAnimals() {
-        return animals;
-    }
 
-    public List<HumanFriends> getAnimalsByCategory(String category) {
-        List<HumanFriends> animalsByCategory = new ArrayList<>();
+
+
+    public void removeAnimalById(int animalId) {
+
+        animals.removeIf(animal -> animal.getId() == animalId);
+    }
+    public boolean animalExists(int animalId) {
+
+        return animals.stream().anyMatch(animal -> animal.getId() == animalId);
+    }
+    public void teachAnimal(int animalId, String newCommand) {
         for (HumanFriends animal : animals) {
-            if (category.equals("All") || animal.getClass().getSimpleName().equals(category)) {
-                animalsByCategory.add(animal);
+            if (animal.getId() == animalId) {
+
+                animal.addCommand(newCommand);
+                break;
             }
         }
-        return animalsByCategory;
     }
 
+
+
+
 }
+
+
 
