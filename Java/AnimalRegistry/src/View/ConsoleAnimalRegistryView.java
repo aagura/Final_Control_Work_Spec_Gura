@@ -47,26 +47,22 @@ public class ConsoleAnimalRegistryView implements AnimalRegistryView {
 
     }
 
+
+
     @Override
-
-
     public void showAnimalList(List<Map<String, Object>> animalList, String[] headers) {
-        // Вывод заголовков
-        System.out.printf("%-5s %-20s %-15s %-15s\n", headers);
 
-        // Вывод данных
+        System.out.printf("%-5s | %-20s | %-15s | %-15s | %-30s\n", (Object[]) headers);
+
+
         for (Map<String, Object> animalInfo : animalList) {
-            System.out.printf("%-5s %-20s %-15s %-15s\n",
+            System.out.printf("%-5s | %-20s | %-15s | %-15s | %-30s\\n\n",
                     animalInfo.get("id"),
                     animalInfo.get("name"),
                     animalInfo.get("birthDate"),
-                    animalInfo.get("category"));
+                    animalInfo.get("category"),
+                    animalInfo.get("commands"));
         }
-
-        // Добавим пустую строку и попросим пользователя что-то ввести перед переходом к следующему шагу
-        System.out.println();
-        System.out.println("Нажмите Enter для продолжения...");
-        scanner.nextLine();
     }
 
 
@@ -126,7 +122,7 @@ public class ConsoleAnimalRegistryView implements AnimalRegistryView {
         for (String command : commandsArray) {
             commandsList.add(command.trim());
         }
-
+        System.out.println(commandsList);
         return commandsList;
     }
     public String getUserInput(String prompt) {
@@ -150,5 +146,20 @@ public class ConsoleAnimalRegistryView implements AnimalRegistryView {
         System.out.println("7. Все животные");
         System.out.println("8. Назад");
     }
+    @Override
+    public int getUserInputAnimalIdToDelete() {
+        System.out.println("Введите ID животного для удаления:");
+        return Integer.parseInt(scanner.nextLine());
+    }
+    @Override
+    public int getAnimalIdToTeach() {
+        System.out.println("Введите ID животного для обучения:");
+        return Integer.parseInt(scanner.nextLine());
+    }
 
+    @Override
+    public String getUserInputNewCommand() {
+        System.out.println("Введите новую команду для обучения:");
+        return scanner.nextLine();
+    }
 }

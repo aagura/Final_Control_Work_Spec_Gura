@@ -1,5 +1,6 @@
 package Model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -47,5 +48,10 @@ public class HumanFriends {
     public void setId(int id) {
         this.id = id;
     }
-
+    public void addCommand(String newCommand) {
+        if (commands == null) {
+            commands = new ArrayList<>();
+        }
+        commands.add(newCommand);
+    }
 }

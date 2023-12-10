@@ -1,12 +1,12 @@
 package Service;
 
-// В DBHandler.java
+
 
 import Model.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+
 
 
 import java.io.File;
@@ -15,13 +15,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
+
 
 public class DBHandler {
+
     private static final String DB_FILE_PATH = "animals.db";
     private static final String DATE_FORMAT_DB = "yyyy-MM-dd";;
 
-    // Метод для получения соединения с базой данных
+
     public static Connection getConnection() throws SQLException {
         try {
             Class.forName("org.sqlite.JDBC");
@@ -32,57 +33,57 @@ public class DBHandler {
         return DriverManager.getConnection(url);
     }
 
-    // Метод для создания базы данных и таблиц, если они отсутствуют
+
     public static void createDatabaseAndTables() {
         File dbFile = new File(DB_FILE_PATH);
 
-        // Вне зависимости от того, существует ли файл, создаем таблицы
+
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + DB_FILE_PATH);
              Statement statement = connection.createStatement()) {
 
-            // Создаем таблицу HumanFriends
+
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS HumanFriends (" +
                     "id INTEGER PRIMARY KEY," +
                     "name VARCHAR(255) NOT NULL," +
                     "birthDate DATE NOT NULL," +
                     "commands JSON)");
 
-            // Создаем таблицу Pets
+
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS Pets (" +
                     "id INTEGER PRIMARY KEY," +
                     "FOREIGN KEY (id) REFERENCES HumanFriends(id) ON DELETE CASCADE)");
 
-            // Создаем таблицу Cat
+
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS Cat (" +
                     "id INTEGER PRIMARY KEY," +
                     "FOREIGN KEY (id) REFERENCES Pets(id) ON DELETE CASCADE)");
 
-            // Создаем таблицу Dog
+
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS Dog (" +
                     "id INTEGER PRIMARY KEY," +
                     "FOREIGN KEY (id) REFERENCES Pets(id) ON DELETE CASCADE)");
 
-            // Создаем таблицу Hamster
+
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS Hamster (" +
                     "id INTEGER PRIMARY KEY," +
                     "FOREIGN KEY (id) REFERENCES Pets(id) ON DELETE CASCADE)");
 
-            // Создаем таблицу PackAnimals
+
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS PackAnimals (" +
                     "id INTEGER PRIMARY KEY," +
                     "FOREIGN KEY (id) REFERENCES HumanFriends(id) ON DELETE CASCADE)");
 
-            // Создаем таблицу Horse
+
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS Horse (" +
                     "id INTEGER PRIMARY KEY," +
                     "FOREIGN KEY (id) REFERENCES PackAnimals(id) ON DELETE CASCADE)");
 
-            // Создаем таблицу Donkey
+
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS Donkey (" +
                     "id INTEGER PRIMARY KEY," +
                     "FOREIGN KEY (id) REFERENCES PackAnimals(id) ON DELETE CASCADE)");
 
-            // Создаем таблицу Camel
+
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS Camel (" +
                     "id INTEGER PRIMARY KEY," +
                     "FOREIGN KEY (id) REFERENCES PackAnimals(id) ON DELETE CASCADE)");
@@ -94,7 +95,7 @@ public class DBHandler {
 
 
 
-    // Метод для загрузки данных из базы данных
+
     public static void loadFromDatabase(List<HumanFriends> animals) {
         try (Connection connection = DBHandler.getConnection();
              Statement statement = connection.createStatement()) {
@@ -114,37 +115,40 @@ public class DBHandler {
         }
     }
 
-    private static <T extends HumanFriends> void loadAnimalsFromTable(Statement statement, String tableName, Class<T> animalClass,List<HumanFriends> animals) throws SQLException {
+    private static <T extends HumanFriends> void loadAnimalsFromTable(Statement statement, String tableName, Class<T> animalClass, List<HumanFriends> animals) throws SQLException {
         ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableName);
         while (resultSet.next()) {
             int id = resultSet.getInt("id");
 
-            // Загрузка дополнительных данных из таблицы HumanFriends по id
-            ResultSet resultSetHumanFriends = statement.executeQuery("SELECT * FROM HumanFriends WHERE id = " + id);
-            if (resultSetHumanFriends.next()) {
-                String name = resultSetHumanFriends.getString("name");
-                Date birthDate = new Date(parseDate(resultSet.getString("birthDate")).getTime());
+            try (Statement secondStatement = statement.getConnection().createStatement()) {
+                ResultSet resultSetHumanFriends = secondStatement.executeQuery("SELECT * FROM HumanFriends WHERE id = " + id);
+                if (resultSetHumanFriends.next()) {
+                    String name = resultSetHumanFriends.getString("name");
+                    Date birthDate = new Date(parseDate(resultSetHumanFriends.getString("birthDate")).getTime());
 
-                // Получение команд из JSON
-                String jsonCommands = resultSetHumanFriends.getString("commands");
-                List<String> commands = parseJsonCommands(jsonCommands);
+                    String jsonCommands = resultSetHumanFriends.getString("commands");
+                    List<String> commands = parseJsonCommands(jsonCommands);
 
-                // Создание объекта соответствующего класса
-                try {
-                    T animal = animalClass.getDeclaredConstructor(int.class, String.class, Date.class, List.class)
-                            .newInstance(id, name, birthDate, commands);
+                    try {
+                        T animal = animalClass.getDeclaredConstructor(int.class, String.class, Date.class, List.class)
+                                .newInstance(id, name, birthDate, commands);
 
-                    animals.add(animal);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                        animals.add(animal);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    System.out.println("Ошибка: не найдены данные для " + tableName + " с id=" + id);
                 }
-            } else {
-                System.out.println("Ошибка: не найдены данные для " + tableName + " с id=" + id);
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
     }
 
-    // Метод для разбора строки JSON и извлечения команд
+
+
+
     private static List<String> parseJsonCommands(String jsonCommands) {
         List<String> commandsList = new ArrayList<>();
 
@@ -166,12 +170,12 @@ public class DBHandler {
 
 
 
-    // Метод для сохранения данных в базу данных
+
     public static void saveToDatabase(List<HumanFriends> animals) {
         try (Connection connection = DBHandler.getConnection();
              Statement statement = connection.createStatement()) {
 
-            // Чистим таблицы перед вставкой новых данных
+
             statement.executeUpdate("DELETE FROM Cat");
             statement.executeUpdate("DELETE FROM Dog");
             statement.executeUpdate("DELETE FROM Hamster");
@@ -228,7 +232,7 @@ public class DBHandler {
                     "INSERT INTO Hamster (id) VALUES " +
                             "(" + animal.getId() + ")");
         }
-        // Добавьте аналогичные вставки для других подклассов Pets
+
     }
 
     private static void insertAnimalIntoPackAnimalsTables(Statement statement, PackAnimals animal) throws SQLException {
@@ -249,7 +253,7 @@ public class DBHandler {
                     "INSERT INTO Donkey (id) VALUES " +
                             "(" + animal.getId() + ")");
         }
-        // Добавьте аналогичные вставки для других подклассов PackAnimals
+
     }
     private static String convertCommandsToJson(List<String> commands) {
         Gson gson = new Gson();
